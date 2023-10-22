@@ -7,6 +7,7 @@ images/
 *.so
 clase.txt
 dataset_tissue.txt
+dataset/
 # Distribution / packaging
 .Python
 build/

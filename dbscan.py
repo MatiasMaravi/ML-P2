@@ -157,8 +157,12 @@ dict_real = {
     "liver":4,
     "endometrium":5,
     "cerebellum":6,
-    "placenta":7,
+    "placenta":7
 }
+
+
+
+
 dict_idx = hallar_indices(label)
 for i in dict_idx[0]:
     lista.append(tissue_names[i])
