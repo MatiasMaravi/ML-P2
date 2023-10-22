@@ -2,10 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+images/
 # C extensions
 *.so
-
+clase.txt
+dataset_tissue.txt
+dataset/
 # Distribution / packaging
 .Python
 build/
