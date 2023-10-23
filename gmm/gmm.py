@@ -5,7 +5,7 @@ np.random.seed(135)
 
 
 class GMM:
-    def __init__(self, K, max_iteraciones=100, tol=1e-10):
+    def __init__(self, K, max_iteraciones=60, tol=1e-4):
         self.K = K
         self.max_iteraciones = max_iteraciones
         self.tol = tol
@@ -16,9 +16,7 @@ class GMM:
             tot = [self.pesos[i] * multivariate_normal.pdf(d, mean=self.medias[i], cov=self.covarianzas[i],allow_singular = True) for i in range(self.K)]
             verosimilitud += np.log(sum(tot))
         return verosimilitud
-
         
-
     def inicializar_parametros(self, dataset):
         
         muestras, caracteristicas = dataset.shape

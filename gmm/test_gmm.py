@@ -11,34 +11,31 @@ from sklearn.decomposition import PCA
 from gmm import GMM
 dataset = pd.read_csv("dataset_tissue.txt")
 dataset.drop(["Unnamed: 0"], axis=1, inplace=True)
+
 dataset = dataset.T
+
+pca = PCA(n_components=40)
+dataset = pca.fit_transform(dataset) 
 clases = pd.read_csv("class.txt")
 clases = np.array(clases)
 l = []
 for x in clases:
 	l.append(x[1])
 l = set(l)
-print(l)
-data = np.array(dataset)
 
 
 
-
-def test_gmm(x_size, K):
-
-	pca = PCA(n_components=x_size)
-	data_redimensionada = pca.fit_transform(data) 
-
+def test_gmm(K):
 	gmm_model = GMM(K)
-	gmm_model.ajustar(data_redimensionada)
-	clusters = gmm_model.clusters(data_redimensionada)
+	gmm_model.ajustar(dataset)
+	clusters = gmm_model.clusters(dataset)
 	return clusters
 
 def show_silhoutte():
 	k_values = [6,7,8]
 	colores = ['red', 'green', 'blue', 'orange', 'lavender', 'yellow', 'pink', 'brown', 'gray', 'teal']
 	for k in k_values:
-		clusters = test_gmm(50,k)
+		clusters = test_gmm(k)
 		silhouette_avg = silhouette_score(dataset, clusters)
 		sample_silhouette_values = silhouette_samples(dataset, clusters)
 
@@ -63,6 +60,7 @@ def show_silhoutte():
 
 			for cluster_id in range(k): 
 				cluster_points = dataset[clusters == cluster_id]  
+			
 				ax2.scatter(cluster_points[:, 0], cluster_points[:, 1], c=colores[cluster_id], label=f'Cluster {cluster_id+1}')
 
 
