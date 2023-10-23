@@ -14,7 +14,7 @@ dataset.drop(["Unnamed: 0"], axis=1, inplace=True)
 
 dataset = dataset.T
 
-pca = PCA(n_components=40)
+pca = PCA(n_components=70)
 dataset = pca.fit_transform(dataset) 
 clases = pd.read_csv("class.txt")
 clases = np.array(clases)
@@ -31,45 +31,41 @@ def test_gmm(K):
 	clusters = gmm_model.clusters(dataset)
 	return clusters
 
-def show_silhoutte():
-	k_values = [6,7,8]
-	colores = ['red', 'green', 'blue', 'orange', 'lavender', 'yellow', 'pink', 'brown', 'gray', 'teal']
-	for k in k_values:
-		clusters = test_gmm(k)
-		silhouette_avg = silhouette_score(dataset, clusters)
-		sample_silhouette_values = silhouette_samples(dataset, clusters)
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import silhouette_samples, silhouette_score
 
-		fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12,6))
+# Train the GMM model
 
-		y_lower = 10
-		for i in range(k):
-			ith_cluster_silhouette_values = sample_silhouette_values[clusters == i]
-			ith_cluster_silhouette_values.sort()
-			size_cluster_i = ith_cluster_silhouette_values.shape[0]
-			y_upper = y_lower + size_cluster_i
-			color = colores[i % len(colores)]
-			ax1.fill_betweenx(np.arange(y_lower, y_upper),0, ith_cluster_silhouette_values,facecolor=color, edgecolor=color, alpha=0.7)
-			ax1.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
-			y_lower = y_upper + 10
-			ax1.set_title("Silhouette plot for k={}".format(k))
-			ax1.set_xlabel("Silhouette coefficient values")
-			ax1.set_ylabel("Cluster label")
-			ax1.axvline(x=silhouette_avg, color="red", linestyle="--")
-			ax1.set_yticks([])
-			ax1.set_xticks([-0.1, 0, 0.2, 0.4, 0.6, 0.8, 1])
+data_redimensionada = dataset;
 
-			for cluster_id in range(k): 
-				cluster_points = dataset[clusters == cluster_id]  
-			
-				ax2.scatter(cluster_points[:, 0], cluster_points[:, 1], c=colores[cluster_id], label=f'Cluster {cluster_id+1}')
+for k in [6,7,8]:
+	gmm = GMM(k)
+	gmm.ajustar(data_redimensionada)
 
+	# Calculate the silhouette scores
+	labels = gmm.predecir(data_redimensionada)
+	silhouette_vals = silhouette_samples(data_redimensionada, labels)
 
-			ax2.set_xlabel('Dimensión 1')
-			ax2.set_ylabel('Dimensión 2')
-			ax2.set_title('Visualización de Clústeres')
-			ax2.legend()
+	# Calculate the average silhouette score
+	silhouette_avg = silhouette_score(data_redimensionada, labels)
+	print("Silhouette score:", silhouette_avg)
+	# Plot the silhouette scores
+	y_lower, y_upper = 0, 0
+	fig, ax = plt.subplots()
+	for i in range(gmm.K):
+	    ith_cluster_silhouette_vals = silhouette_vals[labels == i]
+	    ith_cluster_silhouette_vals.sort()
+	    size_cluster_i = ith_cluster_silhouette_vals.shape[0]
+	    y_upper += size_cluster_i
+	    ax.barh(range(y_lower, y_upper), ith_cluster_silhouette_vals, height=1.0)
+	    ax.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
+	    y_lower += size_cluster_i
 
-			plt.show()
-	
+	ax.axvline(x=silhouette_avg, color="red", linestyle="--")
+	ax.set_yticks([])
+	ax.set_xlim([-0.1, 1])
+	ax.set_xlabel("Silhouette coefficient values")
+	ax.set_ylabel("Cluster labels")
+	plt.show()
 
-show_silhoutte()
