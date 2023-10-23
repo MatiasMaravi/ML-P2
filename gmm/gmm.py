@@ -1,51 +1,78 @@
 import numpy as np
 from scipy.stats import multivariate_normal
+np.random.seed(135)
+
+
 
 class GMM:
-    def __init__(self, K, max_iteraciones=100, tol=1e-4):
+    def __init__(self, K, max_iteraciones=100, tol=1e-10):
         self.K = K
         self.max_iteraciones = max_iteraciones
         self.tol = tol
 
-    def ajustar(self, X):
-        self.X = X
-        self.n_muestras, self.n_caracteristicas = X.shape
+    def calcular_log_verosimilitud(self, dataset, pesos, medias, covarianzas):
+        verosimilitud = 0
+        for d in dataset:
+            tot = [self.pesos[i] * multivariate_normal.pdf(d, mean=self.medias[i], cov=self.covarianzas[i],allow_singular = True) for i in range(self.K)]
+            verosimilitud += np.log(sum(tot))
+        return verosimilitud
+
         
-        # Inicialización de parámetros
-        self.pesos = np.ones(self.K) / self.K
-        self.medias = X[np.random.choice(self.n_muestras, self.K, replace=False)]
-        self.covarianzas = np.array([np.cov(X.T) for _ in range(self.K)])
+
+    def inicializar_parametros(self, dataset):
         
-        # Algoritmo EM
+        muestras, caracteristicas = dataset.shape
+        
+      
+        self.pesos = np.ones(self.K) / self.K  
+        centroides_indices = np.random.choice(muestras, self.K, replace=False)
+        centroides = dataset[centroides_indices]
+        self.medias = centroides
+
+        self.covarianzas = np.array([np.cov(dataset.T) for _ in range(self.K)])
+        self.log_verosimilitud_previa = self.calcular_log_verosimilitud(dataset, self.pesos, self.medias, self.covarianzas)
+
+    def ajustar(self, dataset):
+        self.inicializar_parametros(dataset)
+        self.log_verosimilitud_previa = -np.inf
         for _ in range(self.max_iteraciones):
-            # Etapa E
-            responsabilidades = self._calcular_responsabilidades()
-            
-            # Etapa M
-            suma_total = np.sum(responsabilidades, axis=0)
-            self.pesos = suma_total / self.n_muestras
-            self.medias = np.dot(responsabilidades.T, X) / suma_total[:, np.newaxis]
-            self.covarianzas = np.array([np.dot((responsabilidades[:, k] * (X - self.medias[k]).T), (X - self.medias[k])) / suma_total[k]
-                                          for k in range(self.K)])
-            
-            # Verificar convergencia
-            if np.linalg.norm(self._log_verosimilitud(self.X) - self._log_verosimilitud(self.X, prev_params=True)) < self.tol:
+            responsabilidades = self.etapa_e(dataset)
+            self.etapa_m(dataset, responsabilidades)
+            log_verosimilitud_actual = self.calcular_log_verosimilitud(dataset, self.pesos, self.medias, self.covarianzas)
+        
+            if np.abs(log_verosimilitud_actual - self.log_verosimilitud_previa) < self.tol:
                 break
+            self.log_verosimilitud_previa = log_verosimilitud_actual
     
-    def predecir(self, X):
-        responsabilidades = self._calcular_responsabilidades(X)
-        return np.argmax(responsabilidades, axis=1)
+    def etapa_e(self, dataset):
+        responsabilidades = np.zeros((dataset.shape[0], self.K))
+
+        probabilidades = np.zeros((dataset.shape[0], self.K))
+
+        for k in range(self.K):
+            norm = multivariate_normal(mean=self.medias[k], cov=self.covarianzas[k],allow_singular = True)
+            probabilidades[:, k] = norm.pdf(dataset)
+        
+        responsabilidades = np.nan_to_num(responsabilidades, nan=1)
+     
+        for k in range(self.K):
+           
+            responsabilidades[:, k] = self.pesos[k] * probabilidades[:, k]
+        for i in range(dataset.shape[0]):
+            responsabilidades[i, :] /= np.sum(responsabilidades[i, :])
     
-    def _calcular_responsabilidades(self, X=None):
-        X = X if X is not None else self.X
-        responsabilidades = np.array([self.pesos[k] * multivariate_normal.pdf(X, mean=self.medias[k], cov=self.covarianzas[k])
-                                    for k in range(self.K)]).T
-        responsabilidades /= np.sum(responsabilidades, axis=1)[:, np.newaxis]
         return responsabilidades
+        
     
-    def _log_verosimilitud(self, X, prev_params=False):
-        if prev_params:
-            responsabilidades = self._calcular_responsabilidades(X)
-        else:
-            responsabilidades = self._calcular_responsabilidades()
-        return np.sum(np.log(np.sum(responsabilidades, axis=1)))
+    def etapa_m(self, dataset, responsabilidades):
+        suma = responsabilidades.sum(axis=0)
+        self.pesos = suma / len(dataset)
+        self.medias = np.matmul(responsabilidades.T, dataset)
+        self.medias /= suma[:, None]
+        self.covarianzas = np.array([np.dot(responsabilidades[:, k] * (dataset - self.medias[k]).T, (dataset - self.medias[k])) / suma[k]
+                                      for k in range(self.K)])
+
+    def clusters(self, dataset):
+        responsabilidades = self.etapa_e(dataset)
+        etiquetas = np.argmax(responsabilidades, axis=1)
+        return etiquetas
