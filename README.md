@@ -6,10 +6,10 @@ Un equipo diverso y apasionado de estudiantes está detrás de este proyecto, li
 
 | Nombre Completo                       | Porcentaje de participación          |
 |---------------------------------------|--------------------------------------|
-| Matias Fabricio Maravi Anyosa         |                                      |
-| Carlos Alonso Flores Panduro          |                                      |
-| Esteban Alejandro Principe Ventosilla |                                      | 
-| Gustavo Andres Orosco Zavala          |                                      |
+| Matias Fabricio Maravi Anyosa         |                    100                  |
+| Carlos Alonso Flores Panduro          |                    100                  |
+| Esteban Alejandro Principe Ventosilla |                    100                  | 
+| Gustavo Andres Orosco Zavala          |                    100                  |
 
 ## Estructura del repositorio
 
