@@ -1,0 +1,2 @@
+Por favor descargar los archivos "clase.txt" y "dataset_tissue.txt" del siguiente link y colocarlos en esta carpeta: "https://drive.google.com/drive/folders/1gyvQ9tbogoKCLod6jeBH8wXylY4weZ-w"
+Sin estos archivos no es posible replicar los experimentos.
