@@ -2,8 +2,8 @@ import numpy as np
 from scipy.stats import multivariate_normal
 
 class GMM:
-    def __init__(self, dataset, max_iteraciones=100, tol=1e-4):
-        self.dataset = dataset
+    def __init__(self, K, max_iteraciones=100, tol=1e-4):
+        self.K = K
         self.max_iteraciones = max_iteraciones
         self.tol = tol
 
@@ -12,9 +12,9 @@ class GMM:
         self.n_muestras, self.n_caracteristicas = X.shape
         
         # Inicialización de parámetros
-        self.pesos = np.ones(self.dataset) / self.dataset
-        self.medias = X[np.random.choice(self.n_muestras, self.dataset, replace=False)]
-        self.covarianzas = np.array([np.cov(X.T) for _ in range(self.dataset)])
+        self.pesos = np.ones(self.K) / self.K
+        self.medias = X[np.random.choice(self.n_muestras, self.K, replace=False)]
+        self.covarianzas = np.array([np.cov(X.T) for _ in range(self.K)])
         
         # Algoritmo EM
         for _ in range(self.max_iteraciones):
@@ -26,7 +26,7 @@ class GMM:
             self.pesos = suma_total / self.n_muestras
             self.medias = np.dot(responsabilidades.T, X) / suma_total[:, np.newaxis]
             self.covarianzas = np.array([np.dot((responsabilidades[:, k] * (X - self.medias[k]).T), (X - self.medias[k])) / suma_total[k]
-                                          for k in range(self.dataset)])
+                                          for k in range(self.K)])
             
             # Verificar convergencia
             if np.linalg.norm(self._log_verosimilitud(self.X) - self._log_verosimilitud(self.X, prev_params=True)) < self.tol:
@@ -39,7 +39,7 @@ class GMM:
     def _calcular_responsabilidades(self, X=None):
         X = X if X is not None else self.X
         responsabilidades = np.array([self.pesos[k] * multivariate_normal.pdf(X, mean=self.medias[k], cov=self.covarianzas[k])
-                                    for k in range(self.dataset)]).T
+                                    for k in range(self.K)]).T
         responsabilidades /= np.sum(responsabilidades, axis=1)[:, np.newaxis]
         return responsabilidades
     
