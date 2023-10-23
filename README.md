@@ -4,12 +4,12 @@ Proyecto 2 de Machine Learning
 
 Un equipo diverso y apasionado de estudiantes está detrás de este proyecto, listo para sumergirse en el reino del clustering y el aprendizaje no supervisado. Permítanos presentarnos:
 
-| Nombre Completo                       |
-|---------------------------------------|
-| Matias Fabricio Maravi Anyosa         |
-| Carlos Alonso Flores Panduro          |
-| Esteban Alejandro Principe Ventosilla |
-| Gustavo Andres Orosco Zavala          |
+| Nombre Completo                       | Porcentaje de participación          |
+|---------------------------------------|--------------------------------------|
+| Matias Fabricio Maravi Anyosa         |                                      |
+| Carlos Alonso Flores Panduro          |                                      |
+| Esteban Alejandro Principe Ventosilla |                                      | 
+| Gustavo Andres Orosco Zavala          |                                      |
 
 ## Estructura del repositorio
 
